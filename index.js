@@ -15,7 +15,7 @@ const disease = {
   deathRate: 0.01,
   // The chance a social interaction with an infected person will
   // cause the disease to spread to an uninfected person.
-  infectiousness: 0.03,
+  infectiousness: 0.08,
   // The chance that a person who has recovered from the disease
   // can catch the disease again in another social interaction.
   // This will still include the infectiousness value, so
@@ -119,3 +119,14 @@ simulation({
   }),
   name: "Aggressive Quarantine"
 });
+
+simulation({
+  disease,
+  populationConfiguration,
+  interventions: Object.assign(interventions, {
+    quarantineStartByFatality: 0.01,
+    quarantineStopByEconomicPain: 500,
+    testAvailability: 0.2
+  }),
+  name: "Reactive Intervention"
+})

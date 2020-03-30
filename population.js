@@ -9,28 +9,34 @@ class Population {
     normalInteractionSize,
     disease,
     hospitalAvailability,
-    startingInfectedPopulation
+    startingInfectedPopulation,
+    testAvailability
   }) {
     // seed the population
     this.people = [];
     this.socialGroupSize = socialGroupSize;
     this.sickenedInteractionSize = sickenedInteractionSize;
+    this.expectedInteractions = normalInteractionSize * 2;
     this.normalInteractionSize = normalInteractionSize;
-    _.times(populationSize, n => this.people.push(new Person({ id: n, disease, population: this })));
-    _.sampleSize(this.people, startingInfectedPopulation).forEach(p => p.getSick());
+    _.times(populationSize, n => this.people.push(new Person({ id: n, disease, population: this, testAvailability })));
     this.hospitalBeds = Math.ceil(populationSize * hospitalAvailability);
     this.patientsTurnedAway = 0;
+    this.economicPain = 0;
+    _.sampleSize(this.people, startingInfectedPopulation).forEach(p => p.getSick());
   }
 
   run() {
     this.people.forEach(p => p.startDay());
     this.people.forEach(p => p.interact());
+    const interactionSize = _.meanBy(this.people, p => p.todaysInteractions.length);
+    this.economicPain += (this.expectedInteractions - interactionSize);
     return {
       infected: this.people.filter(p => p.isInfected()).length,
       dead: this.people.filter(p => !p.isAlive()).length,
-      interactionSize: _.meanBy(this.people, p => p.todaysInteractions.length),
+      interactionSize,
       recovered: this.people.filter(p => p.hasRecovered()).length,
-      patientsTurnedAway: this.patientsTurnedAway
+      patientsTurnedAway: this.patientsTurnedAway,
+      economicPain: this.economicPain
     }
   }
 
@@ -46,8 +52,6 @@ class Population {
   dischargeFromHospital() {
     this.hospitalBeds++;
   }
-
-
 }
 
 module.exports = Population;

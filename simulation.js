@@ -3,7 +3,6 @@ const Population = require("./population.js");
 const pandemicPeriod = 100;
 
 module.exports = ({ disease, populationConfiguration, interventions, name }) => {
-
   
   const population = new Population({
     ...Object.assign({}, populationConfiguration),
@@ -22,7 +21,16 @@ module.exports = ({ disease, populationConfiguration, interventions, name }) => 
     if(stats.infected / population.people.length < interventions.quarantineEnd) {
       population.normalInteractionSize = populationConfiguration.normalInteractionSize;
     }
-    console.log(`${stats.infected}, ${stats.dead}, ${stats.interactionSize}, ${stats.recovered}, ${stats.patientsTurnedAway}`);
+
+    if(interventions.quarantineStartByFatality && (stats.dead / population.people.length) > interventions.quarantineStartByFatality) {
+      population.normalInteractionSize = interventions.sickenedInteractionSize;
+    }
+
+    if(interventions.quarantineStopByEconomicPain && stats.economicPain > interventions.quarantineStopByEconomicPain) {
+      population.normalInteractionSize = populationConfiguration.normalInteractionSize;
+    }
+
+    console.log(`${stats.infected}, ${stats.dead}, ${stats.interactionSize}, ${stats.recovered}, ${stats.patientsTurnedAway}, ${stats.economicPain}`);
     if(stats.infected === 0) {
       // save ourselves some time if the outbreak is over
       break;
