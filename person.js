@@ -1,13 +1,14 @@
 const _ = require("lodash");
 
 class Person {
-  constructor({ id, disease, population }) {
+  constructor({ id, disease, population, testAvailability }) {
     this.id = id;
     // seed all the people you might interact with, sortof like a neighborhood
     this.interactions = _.sampleSize(population.people, population.socialGroupSize);
     this.infection = {};
     this.disease = disease;
     this.population = population;
+    this.testAvailability = testAvailability;
     this.todaysInteractions = [];
   }
 
@@ -24,8 +25,8 @@ class Person {
   }
 
   infect(friend) {
-    const myRisk = this.hasRecovered() ? this.disease.infectiousness / this.disease.reinfectionMultiple : this.disease.infectiousness;
-    const theirRisk = friend.hasRecovered() ? this.disease.infectiousness / this.disease.reinfectionMultiple : this.disease.infectiousness;
+    const myRisk = this.hasRecovered() ? this.disease.infectiousness * this.disease.reinfectionRate : this.disease.infectiousness;
+    const theirRisk = friend.hasRecovered() ? this.disease.infectiousness * this.disease.reinfectionRate : this.disease.infectiousness;
     // will this person get me sick?
     if (!this.isInfected() && friend.isInfected() && Math.random() <= myRisk) {
       this.getSick();
@@ -130,7 +131,7 @@ class Person {
     this.infection.symptomaticDays = randDays(this.disease.symptomaticDays);
     this.infection.daysSick = 1;
     this.infection.severity = Math.random();
-    this.wasTested = Math.random() < this.disease.testAvailability;
+    this.wasTested = Math.random() < this.testAvailability;
   }
 }
 
